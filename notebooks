@@ -1,0 +1,2589 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "5a9eabff-b06b-4919-ba19-5a9a0497aff4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import ast"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "19497c1d-207d-4497-9cf9-ee0e5c658b9c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies=pd.read_csv('tmdb_5000_movies.csv')\n",
+    "credits=pd.read_csv('tmdb_5000_credits.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "07753b4f-8a1e-4d98-8753-f4f367b932d2",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>budget</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>homepage</th>\n",
+       "      <th>id</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>original_language</th>\n",
+       "      <th>original_title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>popularity</th>\n",
+       "      <th>production_companies</th>\n",
+       "      <th>production_countries</th>\n",
+       "      <th>release_date</th>\n",
+       "      <th>revenue</th>\n",
+       "      <th>runtime</th>\n",
+       "      <th>spoken_languages</th>\n",
+       "      <th>status</th>\n",
+       "      <th>tagline</th>\n",
+       "      <th>title</th>\n",
+       "      <th>vote_average</th>\n",
+       "      <th>vote_count</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>237000000</td>\n",
+       "      <td>[{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...</td>\n",
+       "      <td>http://www.avatarmovie.com/</td>\n",
+       "      <td>19995</td>\n",
+       "      <td>[{\"id\": 1463, \"name\": \"culture clash\"}, {\"id\":...</td>\n",
+       "      <td>en</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>In the 22nd century, a paraplegic Marine is di...</td>\n",
+       "      <td>150.437577</td>\n",
+       "      <td>[{\"name\": \"Ingenious Film Partners\", \"id\": 289...</td>\n",
+       "      <td>[{\"iso_3166_1\": \"US\", \"name\": \"United States o...</td>\n",
+       "      <td>2009-12-10</td>\n",
+       "      <td>2787965087</td>\n",
+       "      <td>162.0</td>\n",
+       "      <td>[{\"iso_639_1\": \"en\", \"name\": \"English\"}, {\"iso...</td>\n",
+       "      <td>Released</td>\n",
+       "      <td>Enter the World of Pandora.</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>7.2</td>\n",
+       "      <td>11800</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      budget                                             genres  \\\n",
+       "0  237000000  [{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...   \n",
+       "\n",
+       "                      homepage     id  \\\n",
+       "0  http://www.avatarmovie.com/  19995   \n",
+       "\n",
+       "                                            keywords original_language  \\\n",
+       "0  [{\"id\": 1463, \"name\": \"culture clash\"}, {\"id\":...                en   \n",
+       "\n",
+       "  original_title                                           overview  \\\n",
+       "0         Avatar  In the 22nd century, a paraplegic Marine is di...   \n",
+       "\n",
+       "   popularity                               production_companies  \\\n",
+       "0  150.437577  [{\"name\": \"Ingenious Film Partners\", \"id\": 289...   \n",
+       "\n",
+       "                                production_countries release_date     revenue  \\\n",
+       "0  [{\"iso_3166_1\": \"US\", \"name\": \"United States o...   2009-12-10  2787965087   \n",
+       "\n",
+       "   runtime                                   spoken_languages    status  \\\n",
+       "0    162.0  [{\"iso_639_1\": \"en\", \"name\": \"English\"}, {\"iso...  Released   \n",
+       "\n",
+       "                       tagline   title  vote_average  vote_count  \n",
+       "0  Enter the World of Pandora.  Avatar           7.2       11800  "
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "f6702bec-53fd-482b-848b-6f55362c4a29",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>movie_id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>[{\"cast_id\": 242, \"character\": \"Jake Sully\", \"...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe48009251416c750aca23\", \"de...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   movie_id   title                                               cast  \\\n",
+       "0     19995  Avatar  [{\"cast_id\": 242, \"character\": \"Jake Sully\", \"...   \n",
+       "\n",
+       "                                                crew  \n",
+       "0  [{\"credit_id\": \"52fe48009251416c750aca23\", \"de...  "
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "credits.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "3b28d478-3098-4515-83ea-33dc77d7776a",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(4809, 23)"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.merge(credits,on='title').shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "f7638d16-e59f-4ed2-9bc0-127ed3de0b3a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies=movies.merge(credits,on='title')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "091593b9-1408-40de-a3ab-17da197eed2d",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>budget</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>homepage</th>\n",
+       "      <th>id</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>original_language</th>\n",
+       "      <th>original_title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>popularity</th>\n",
+       "      <th>production_companies</th>\n",
+       "      <th>...</th>\n",
+       "      <th>runtime</th>\n",
+       "      <th>spoken_languages</th>\n",
+       "      <th>status</th>\n",
+       "      <th>tagline</th>\n",
+       "      <th>title</th>\n",
+       "      <th>vote_average</th>\n",
+       "      <th>vote_count</th>\n",
+       "      <th>movie_id</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>237000000</td>\n",
+       "      <td>[{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...</td>\n",
+       "      <td>http://www.avatarmovie.com/</td>\n",
+       "      <td>19995</td>\n",
+       "      <td>[{\"id\": 1463, \"name\": \"culture clash\"}, {\"id\":...</td>\n",
+       "      <td>en</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>In the 22nd century, a paraplegic Marine is di...</td>\n",
+       "      <td>150.437577</td>\n",
+       "      <td>[{\"name\": \"Ingenious Film Partners\", \"id\": 289...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>162.0</td>\n",
+       "      <td>[{\"iso_639_1\": \"en\", \"name\": \"English\"}, {\"iso...</td>\n",
+       "      <td>Released</td>\n",
+       "      <td>Enter the World of Pandora.</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>7.2</td>\n",
+       "      <td>11800</td>\n",
+       "      <td>19995</td>\n",
+       "      <td>[{\"cast_id\": 242, \"character\": \"Jake Sully\", \"...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe48009251416c750aca23\", \"de...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>1 rows × 23 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      budget                                             genres  \\\n",
+       "0  237000000  [{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...   \n",
+       "\n",
+       "                      homepage     id  \\\n",
+       "0  http://www.avatarmovie.com/  19995   \n",
+       "\n",
+       "                                            keywords original_language  \\\n",
+       "0  [{\"id\": 1463, \"name\": \"culture clash\"}, {\"id\":...                en   \n",
+       "\n",
+       "  original_title                                           overview  \\\n",
+       "0         Avatar  In the 22nd century, a paraplegic Marine is di...   \n",
+       "\n",
+       "   popularity                               production_companies  ... runtime  \\\n",
+       "0  150.437577  [{\"name\": \"Ingenious Film Partners\", \"id\": 289...  ...   162.0   \n",
+       "\n",
+       "                                    spoken_languages    status  \\\n",
+       "0  [{\"iso_639_1\": \"en\", \"name\": \"English\"}, {\"iso...  Released   \n",
+       "\n",
+       "                       tagline   title vote_average vote_count movie_id  \\\n",
+       "0  Enter the World of Pandora.  Avatar          7.2      11800    19995   \n",
+       "\n",
+       "                                                cast  \\\n",
+       "0  [{\"cast_id\": 242, \"character\": \"Jake Sully\", \"...   \n",
+       "\n",
+       "                                                crew  \n",
+       "0  [{\"credit_id\": \"52fe48009251416c750aca23\", \"de...  \n",
+       "\n",
+       "[1 rows x 23 columns]"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "90587fe2-1e5c-4408-922e-9b561a8a860c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>In the 22nd century, a paraplegic Marine is di...</td>\n",
+       "      <td>[{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...</td>\n",
+       "      <td>[{\"id\": 1463, \"name\": \"culture clash\"}, {\"id\":...</td>\n",
+       "      <td>[{\"cast_id\": 242, \"character\": \"Jake Sully\", \"...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe48009251416c750aca23\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>285</td>\n",
+       "      <td>Pirates of the Caribbean: At World's End</td>\n",
+       "      <td>Captain Barbossa, long believed to be dead, ha...</td>\n",
+       "      <td>[{\"id\": 12, \"name\": \"Adventure\"}, {\"id\": 14, \"...</td>\n",
+       "      <td>[{\"id\": 270, \"name\": \"ocean\"}, {\"id\": 726, \"na...</td>\n",
+       "      <td>[{\"cast_id\": 4, \"character\": \"Captain Jack Spa...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe4232c3a36847f800b579\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>206647</td>\n",
+       "      <td>Spectre</td>\n",
+       "      <td>A cryptic message from Bond’s past sends him o...</td>\n",
+       "      <td>[{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...</td>\n",
+       "      <td>[{\"id\": 470, \"name\": \"spy\"}, {\"id\": 818, \"name...</td>\n",
+       "      <td>[{\"cast_id\": 1, \"character\": \"James Bond\", \"cr...</td>\n",
+       "      <td>[{\"credit_id\": \"54805967c3a36829b5002c41\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>49026</td>\n",
+       "      <td>The Dark Knight Rises</td>\n",
+       "      <td>Following the death of District Attorney Harve...</td>\n",
+       "      <td>[{\"id\": 28, \"name\": \"Action\"}, {\"id\": 80, \"nam...</td>\n",
+       "      <td>[{\"id\": 849, \"name\": \"dc comics\"}, {\"id\": 853,...</td>\n",
+       "      <td>[{\"cast_id\": 2, \"character\": \"Bruce Wayne / Ba...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe4781c3a36847f81398c3\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>49529</td>\n",
+       "      <td>John Carter</td>\n",
+       "      <td>John Carter is a war-weary, former military ca...</td>\n",
+       "      <td>[{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...</td>\n",
+       "      <td>[{\"id\": 818, \"name\": \"based on novel\"}, {\"id\":...</td>\n",
+       "      <td>[{\"cast_id\": 5, \"character\": \"John Carter\", \"c...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe479ac3a36847f813eaa3\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4804</th>\n",
+       "      <td>9367</td>\n",
+       "      <td>El Mariachi</td>\n",
+       "      <td>El Mariachi just wants to play his guitar and ...</td>\n",
+       "      <td>[{\"id\": 28, \"name\": \"Action\"}, {\"id\": 80, \"nam...</td>\n",
+       "      <td>[{\"id\": 5616, \"name\": \"united states\\u2013mexi...</td>\n",
+       "      <td>[{\"cast_id\": 1, \"character\": \"El Mariachi\", \"c...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe44eec3a36847f80b280b\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4805</th>\n",
+       "      <td>72766</td>\n",
+       "      <td>Newlyweds</td>\n",
+       "      <td>A newlywed couple's honeymoon is upended by th...</td>\n",
+       "      <td>[{\"id\": 35, \"name\": \"Comedy\"}, {\"id\": 10749, \"...</td>\n",
+       "      <td>[]</td>\n",
+       "      <td>[{\"cast_id\": 1, \"character\": \"Buzzy\", \"credit_...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe487dc3a368484e0fb013\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4806</th>\n",
+       "      <td>231617</td>\n",
+       "      <td>Signed, Sealed, Delivered</td>\n",
+       "      <td>\"Signed, Sealed, Delivered\" introduces a dedic...</td>\n",
+       "      <td>[{\"id\": 35, \"name\": \"Comedy\"}, {\"id\": 18, \"nam...</td>\n",
+       "      <td>[{\"id\": 248, \"name\": \"date\"}, {\"id\": 699, \"nam...</td>\n",
+       "      <td>[{\"cast_id\": 8, \"character\": \"Oliver O\\u2019To...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe4df3c3a36847f8275ecf\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4807</th>\n",
+       "      <td>126186</td>\n",
+       "      <td>Shanghai Calling</td>\n",
+       "      <td>When ambitious New York attorney Sam is sent t...</td>\n",
+       "      <td>[]</td>\n",
+       "      <td>[]</td>\n",
+       "      <td>[{\"cast_id\": 3, \"character\": \"Sam\", \"credit_id...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe4ad9c3a368484e16a36b\", \"de...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4808</th>\n",
+       "      <td>25975</td>\n",
+       "      <td>My Date with Drew</td>\n",
+       "      <td>Ever since the second grade when he first saw ...</td>\n",
+       "      <td>[{\"id\": 99, \"name\": \"Documentary\"}]</td>\n",
+       "      <td>[{\"id\": 1523, \"name\": \"obsession\"}, {\"id\": 224...</td>\n",
+       "      <td>[{\"cast_id\": 3, \"character\": \"Herself\", \"credi...</td>\n",
+       "      <td>[{\"credit_id\": \"58ce021b9251415a390165d9\", \"de...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>4809 rows × 7 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          id                                     title  \\\n",
+       "0      19995                                    Avatar   \n",
+       "1        285  Pirates of the Caribbean: At World's End   \n",
+       "2     206647                                   Spectre   \n",
+       "3      49026                     The Dark Knight Rises   \n",
+       "4      49529                               John Carter   \n",
+       "...      ...                                       ...   \n",
+       "4804    9367                               El Mariachi   \n",
+       "4805   72766                                 Newlyweds   \n",
+       "4806  231617                 Signed, Sealed, Delivered   \n",
+       "4807  126186                          Shanghai Calling   \n",
+       "4808   25975                         My Date with Drew   \n",
+       "\n",
+       "                                               overview  \\\n",
+       "0     In the 22nd century, a paraplegic Marine is di...   \n",
+       "1     Captain Barbossa, long believed to be dead, ha...   \n",
+       "2     A cryptic message from Bond’s past sends him o...   \n",
+       "3     Following the death of District Attorney Harve...   \n",
+       "4     John Carter is a war-weary, former military ca...   \n",
+       "...                                                 ...   \n",
+       "4804  El Mariachi just wants to play his guitar and ...   \n",
+       "4805  A newlywed couple's honeymoon is upended by th...   \n",
+       "4806  \"Signed, Sealed, Delivered\" introduces a dedic...   \n",
+       "4807  When ambitious New York attorney Sam is sent t...   \n",
+       "4808  Ever since the second grade when he first saw ...   \n",
+       "\n",
+       "                                                 genres  \\\n",
+       "0     [{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...   \n",
+       "1     [{\"id\": 12, \"name\": \"Adventure\"}, {\"id\": 14, \"...   \n",
+       "2     [{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...   \n",
+       "3     [{\"id\": 28, \"name\": \"Action\"}, {\"id\": 80, \"nam...   \n",
+       "4     [{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...   \n",
+       "...                                                 ...   \n",
+       "4804  [{\"id\": 28, \"name\": \"Action\"}, {\"id\": 80, \"nam...   \n",
+       "4805  [{\"id\": 35, \"name\": \"Comedy\"}, {\"id\": 10749, \"...   \n",
+       "4806  [{\"id\": 35, \"name\": \"Comedy\"}, {\"id\": 18, \"nam...   \n",
+       "4807                                                 []   \n",
+       "4808                [{\"id\": 99, \"name\": \"Documentary\"}]   \n",
+       "\n",
+       "                                               keywords  \\\n",
+       "0     [{\"id\": 1463, \"name\": \"culture clash\"}, {\"id\":...   \n",
+       "1     [{\"id\": 270, \"name\": \"ocean\"}, {\"id\": 726, \"na...   \n",
+       "2     [{\"id\": 470, \"name\": \"spy\"}, {\"id\": 818, \"name...   \n",
+       "3     [{\"id\": 849, \"name\": \"dc comics\"}, {\"id\": 853,...   \n",
+       "4     [{\"id\": 818, \"name\": \"based on novel\"}, {\"id\":...   \n",
+       "...                                                 ...   \n",
+       "4804  [{\"id\": 5616, \"name\": \"united states\\u2013mexi...   \n",
+       "4805                                                 []   \n",
+       "4806  [{\"id\": 248, \"name\": \"date\"}, {\"id\": 699, \"nam...   \n",
+       "4807                                                 []   \n",
+       "4808  [{\"id\": 1523, \"name\": \"obsession\"}, {\"id\": 224...   \n",
+       "\n",
+       "                                                   cast  \\\n",
+       "0     [{\"cast_id\": 242, \"character\": \"Jake Sully\", \"...   \n",
+       "1     [{\"cast_id\": 4, \"character\": \"Captain Jack Spa...   \n",
+       "2     [{\"cast_id\": 1, \"character\": \"James Bond\", \"cr...   \n",
+       "3     [{\"cast_id\": 2, \"character\": \"Bruce Wayne / Ba...   \n",
+       "4     [{\"cast_id\": 5, \"character\": \"John Carter\", \"c...   \n",
+       "...                                                 ...   \n",
+       "4804  [{\"cast_id\": 1, \"character\": \"El Mariachi\", \"c...   \n",
+       "4805  [{\"cast_id\": 1, \"character\": \"Buzzy\", \"credit_...   \n",
+       "4806  [{\"cast_id\": 8, \"character\": \"Oliver O\\u2019To...   \n",
+       "4807  [{\"cast_id\": 3, \"character\": \"Sam\", \"credit_id...   \n",
+       "4808  [{\"cast_id\": 3, \"character\": \"Herself\", \"credi...   \n",
+       "\n",
+       "                                                   crew  \n",
+       "0     [{\"credit_id\": \"52fe48009251416c750aca23\", \"de...  \n",
+       "1     [{\"credit_id\": \"52fe4232c3a36847f800b579\", \"de...  \n",
+       "2     [{\"credit_id\": \"54805967c3a36829b5002c41\", \"de...  \n",
+       "3     [{\"credit_id\": \"52fe4781c3a36847f81398c3\", \"de...  \n",
+       "4     [{\"credit_id\": \"52fe479ac3a36847f813eaa3\", \"de...  \n",
+       "...                                                 ...  \n",
+       "4804  [{\"credit_id\": \"52fe44eec3a36847f80b280b\", \"de...  \n",
+       "4805  [{\"credit_id\": \"52fe487dc3a368484e0fb013\", \"de...  \n",
+       "4806  [{\"credit_id\": \"52fe4df3c3a36847f8275ecf\", \"de...  \n",
+       "4807  [{\"credit_id\": \"52fe4ad9c3a368484e16a36b\", \"de...  \n",
+       "4808  [{\"credit_id\": \"58ce021b9251415a390165d9\", \"de...  \n",
+       "\n",
+       "[4809 rows x 7 columns]"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies[['id','title','overview','genres','keywords','cast','crew']]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "29fa0d4c-e5a8-4e7d-abce-c4449d9bf207",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies=movies[['id','title','overview','genres','keywords','cast','crew']]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "03c8698f-0da8-45fb-a1d5-6bcca6657812",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>In the 22nd century, a paraplegic Marine is di...</td>\n",
+       "      <td>[{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...</td>\n",
+       "      <td>[{\"id\": 1463, \"name\": \"culture clash\"}, {\"id\":...</td>\n",
+       "      <td>[{\"cast_id\": 242, \"character\": \"Jake Sully\", \"...</td>\n",
+       "      <td>[{\"credit_id\": \"52fe48009251416c750aca23\", \"de...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      id   title                                           overview  \\\n",
+       "0  19995  Avatar  In the 22nd century, a paraplegic Marine is di...   \n",
+       "\n",
+       "                                              genres  \\\n",
+       "0  [{\"id\": 28, \"name\": \"Action\"}, {\"id\": 12, \"nam...   \n",
+       "\n",
+       "                                            keywords  \\\n",
+       "0  [{\"id\": 1463, \"name\": \"culture clash\"}, {\"id\":...   \n",
+       "\n",
+       "                                                cast  \\\n",
+       "0  [{\"cast_id\": 242, \"character\": \"Jake Sully\", \"...   \n",
+       "\n",
+       "                                                crew  \n",
+       "0  [{\"credit_id\": \"52fe48009251416c750aca23\", \"de...  "
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "e2fc20af-16a4-4d54-884d-d2b772a6189a",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "id          0\n",
+       "title       0\n",
+       "overview    3\n",
+       "genres      0\n",
+       "keywords    0\n",
+       "cast        0\n",
+       "crew        0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.isnull().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "dd2b3786-ef9f-4038-a6f2-2cc4ce4c2a7b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies.dropna(inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "a5a8703b-ae02-4791-8e7c-b13b9ba9656c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "id          0\n",
+       "title       0\n",
+       "overview    0\n",
+       "genres      0\n",
+       "keywords    0\n",
+       "cast        0\n",
+       "crew        0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.isnull().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "2d94b4f0-63bd-46ed-a513-d4e0ed05c340",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "np.int64(0)"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.duplicated().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "ea9741b6-e053-43bc-8da1-f053e60c9f20",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def convert(obj):\n",
+    "    L=[]\n",
+    "    for i in ast.literal_eval(obj):\n",
+    "       L.append(i['name'])\n",
+    "    return L"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "id": "ef34fa42-e4ae-472b-aa60-4565b4001c77",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0       [Action, Adventure, Fantasy, Science Fiction]\n",
+       "1                        [Adventure, Fantasy, Action]\n",
+       "2                          [Action, Adventure, Crime]\n",
+       "3                    [Action, Crime, Drama, Thriller]\n",
+       "4                [Action, Adventure, Science Fiction]\n",
+       "                            ...                      \n",
+       "4804                        [Action, Crime, Thriller]\n",
+       "4805                                [Comedy, Romance]\n",
+       "4806               [Comedy, Drama, Romance, TV Movie]\n",
+       "4807                                               []\n",
+       "4808                                    [Documentary]\n",
+       "Name: genres, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies['genres'].apply(convert)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "1d445716-33c6-46ad-a01e-46a91235d60a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies['genres']=movies['genres'].apply(convert)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "20368411-68b1-43bf-9a4f-eb167740f96c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies['keywords']=movies['keywords'].apply(convert)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "3d5a5bd1-4c27-4136-b56c-a65acd35afe5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def convert3(obj):\n",
+    "    L=[]\n",
+    "    cnt=0\n",
+    "    for i in ast.literal_eval(obj):\n",
+    "        if cnt!=3:\n",
+    "          L.append(i['name'])\n",
+    "          cnt+=1\n",
+    "        else:\n",
+    "            break\n",
+    "    return L"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "df944ab5-2689-4a67-ba2a-a616fdaa540c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0        [Sam Worthington, Zoe Saldana, Sigourney Weaver]\n",
+       "1           [Johnny Depp, Orlando Bloom, Keira Knightley]\n",
+       "2            [Daniel Craig, Christoph Waltz, Léa Seydoux]\n",
+       "3            [Christian Bale, Michael Caine, Gary Oldman]\n",
+       "4          [Taylor Kitsch, Lynn Collins, Samantha Morton]\n",
+       "                              ...                        \n",
+       "4804    [Carlos Gallardo, Jaime de Hoyos, Peter Marqua...\n",
+       "4805         [Edward Burns, Kerry Bishé, Marsha Dietlein]\n",
+       "4806           [Eric Mabius, Kristin Booth, Crystal Lowe]\n",
+       "4807            [Daniel Henney, Eliza Coupe, Bill Paxton]\n",
+       "4808    [Drew Barrymore, Brian Herzlinger, Corey Feldman]\n",
+       "Name: cast, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies['cast'].apply(convert3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "efa7210c-be7b-4c01-b381-0e3479341142",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies['cast']=movies['cast'].apply(convert3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "41600656-f293-4617-b34b-283cc554ba78",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>In the 22nd century, a paraplegic Marine is di...</td>\n",
+       "      <td>[Action, Adventure, Fantasy, Science Fiction]</td>\n",
+       "      <td>[culture clash, future, space war, space colon...</td>\n",
+       "      <td>[Sam Worthington, Zoe Saldana, Sigourney Weaver]</td>\n",
+       "      <td>[{\"credit_id\": \"52fe48009251416c750aca23\", \"de...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      id   title                                           overview  \\\n",
+       "0  19995  Avatar  In the 22nd century, a paraplegic Marine is di...   \n",
+       "\n",
+       "                                          genres  \\\n",
+       "0  [Action, Adventure, Fantasy, Science Fiction]   \n",
+       "\n",
+       "                                            keywords  \\\n",
+       "0  [culture clash, future, space war, space colon...   \n",
+       "\n",
+       "                                               cast  \\\n",
+       "0  [Sam Worthington, Zoe Saldana, Sigourney Weaver]   \n",
+       "\n",
+       "                                                crew  \n",
+       "0  [{\"credit_id\": \"52fe48009251416c750aca23\", \"de...  "
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "id": "813de548-8c35-4ecb-8a32-5451d579874b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def fetch_director(obj):\n",
+    "    L=[]\n",
+    "    for i in ast.literal_eval(obj):\n",
+    "        if i['job']=='Director':\n",
+    "          L.append(i['name'])\n",
+    "          break\n",
+    "    return L"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "id": "00d4f2ec-1ce7-445c-987b-59c901275d73",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0                       []\n",
+       "1                       []\n",
+       "2                       []\n",
+       "3                       []\n",
+       "4                       []\n",
+       "               ...        \n",
+       "4804    [Robert Rodriguez]\n",
+       "4805        [Edward Burns]\n",
+       "4806                    []\n",
+       "4807         [Daniel Hsia]\n",
+       "4808                    []\n",
+       "Name: crew, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 30,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies['crew'].apply(fetch_director)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "id": "4ec9ddd1-9fc9-4835-a713-35f29e47144f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0           [James Cameron]\n",
+       "1          [Gore Verbinski]\n",
+       "2              [Sam Mendes]\n",
+       "3       [Christopher Nolan]\n",
+       "4          [Andrew Stanton]\n",
+       "               ...         \n",
+       "4804     [Robert Rodriguez]\n",
+       "4805         [Edward Burns]\n",
+       "4806          [Scott Smith]\n",
+       "4807          [Daniel Hsia]\n",
+       "4808     [Brian Herzlinger]\n",
+       "Name: crew, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 32,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies['crew'].apply(fetch_director)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "id": "61622b1e-fc67-4e3e-b541-c0b07f4be716",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies['crew']=movies['crew'].apply(fetch_director)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "id": "76d47d9f-b9ba-4001-a8b8-f47adc96d7e4",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>In the 22nd century, a paraplegic Marine is di...</td>\n",
+       "      <td>[Action, Adventure, Fantasy, Science Fiction]</td>\n",
+       "      <td>[culture clash, future, space war, space colon...</td>\n",
+       "      <td>[Sam Worthington, Zoe Saldana, Sigourney Weaver]</td>\n",
+       "      <td>[James Cameron]</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      id   title                                           overview  \\\n",
+       "0  19995  Avatar  In the 22nd century, a paraplegic Marine is di...   \n",
+       "\n",
+       "                                          genres  \\\n",
+       "0  [Action, Adventure, Fantasy, Science Fiction]   \n",
+       "\n",
+       "                                            keywords  \\\n",
+       "0  [culture clash, future, space war, space colon...   \n",
+       "\n",
+       "                                               cast             crew  \n",
+       "0  [Sam Worthington, Zoe Saldana, Sigourney Weaver]  [James Cameron]  "
+      ]
+     },
+     "execution_count": 34,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "id": "6032ac62-73fb-45fa-a329-3f71001f0f6e",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0       [In, the, 22nd, century,, a, paraplegic, Marin...\n",
+       "1       [Captain, Barbossa,, long, believed, to, be, d...\n",
+       "2       [A, cryptic, message, from, Bond’s, past, send...\n",
+       "3       [Following, the, death, of, District, Attorney...\n",
+       "4       [John, Carter, is, a, war-weary,, former, mili...\n",
+       "                              ...                        \n",
+       "4804    [El, Mariachi, just, wants, to, play, his, gui...\n",
+       "4805    [A, newlywed, couple's, honeymoon, is, upended...\n",
+       "4806    [\"Signed,, Sealed,, Delivered\", introduces, a,...\n",
+       "4807    [When, ambitious, New, York, attorney, Sam, is...\n",
+       "4808    [Ever, since, the, second, grade, when, he, fi...\n",
+       "Name: overview, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 35,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies['overview'].apply(lambda x:x.split())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "26eef6a8-fefa-493f-b172-9f89c880f2cb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies['overview']=movies['overview'].apply(lambda x:x.split())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "id": "62cde260-8e10-4501-a7f0-41c419e05b6e",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>[In, the, 22nd, century,, a, paraplegic, Marin...</td>\n",
+       "      <td>[Action, Adventure, Fantasy, Science Fiction]</td>\n",
+       "      <td>[culture clash, future, space war, space colon...</td>\n",
+       "      <td>[Sam Worthington, Zoe Saldana, Sigourney Weaver]</td>\n",
+       "      <td>[James Cameron]</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      id   title                                           overview  \\\n",
+       "0  19995  Avatar  [In, the, 22nd, century,, a, paraplegic, Marin...   \n",
+       "\n",
+       "                                          genres  \\\n",
+       "0  [Action, Adventure, Fantasy, Science Fiction]   \n",
+       "\n",
+       "                                            keywords  \\\n",
+       "0  [culture clash, future, space war, space colon...   \n",
+       "\n",
+       "                                               cast             crew  \n",
+       "0  [Sam Worthington, Zoe Saldana, Sigourney Weaver]  [James Cameron]  "
+      ]
+     },
+     "execution_count": 37,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "id": "bef2fdf4-eaa0-4b29-b618-360d14cda3a7",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0       [Action, Adventure, Fantasy, ScienceFiction]\n",
+       "1                       [Adventure, Fantasy, Action]\n",
+       "2                         [Action, Adventure, Crime]\n",
+       "3                   [Action, Crime, Drama, Thriller]\n",
+       "4                [Action, Adventure, ScienceFiction]\n",
+       "                            ...                     \n",
+       "4804                       [Action, Crime, Thriller]\n",
+       "4805                               [Comedy, Romance]\n",
+       "4806               [Comedy, Drama, Romance, TVMovie]\n",
+       "4807                                              []\n",
+       "4808                                   [Documentary]\n",
+       "Name: genres, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 38,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies['genres'].apply(lambda x :[i.replace(\" \",\"\") for i in x])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "id": "a964f892-2785-4276-8ea1-af52c39f55d7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies['genres']=movies['genres'].apply(lambda x :[i.replace(\" \",\"\") for i in x])\n",
+    "movies['keywords']=movies['keywords'].apply(lambda x :[i.replace(\" \",\"\") for i in x])\n",
+    "movies['cast']=movies['cast'].apply(lambda x :[i.replace(\" \",\"\") for i in x])\n",
+    "movies['crew']=movies['crew'].apply(lambda x :[i.replace(\" \",\"\") for i in x])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "id": "b12f56ae-a929-4159-a8de-a77521694c10",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>[In, the, 22nd, century,, a, paraplegic, Marin...</td>\n",
+       "      <td>[Action, Adventure, Fantasy, ScienceFiction]</td>\n",
+       "      <td>[cultureclash, future, spacewar, spacecolony, ...</td>\n",
+       "      <td>[SamWorthington, ZoeSaldana, SigourneyWeaver]</td>\n",
+       "      <td>[JamesCameron]</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>285</td>\n",
+       "      <td>Pirates of the Caribbean: At World's End</td>\n",
+       "      <td>[Captain, Barbossa,, long, believed, to, be, d...</td>\n",
+       "      <td>[Adventure, Fantasy, Action]</td>\n",
+       "      <td>[ocean, drugabuse, exoticisland, eastindiatrad...</td>\n",
+       "      <td>[JohnnyDepp, OrlandoBloom, KeiraKnightley]</td>\n",
+       "      <td>[GoreVerbinski]</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>206647</td>\n",
+       "      <td>Spectre</td>\n",
+       "      <td>[A, cryptic, message, from, Bond’s, past, send...</td>\n",
+       "      <td>[Action, Adventure, Crime]</td>\n",
+       "      <td>[spy, basedonnovel, secretagent, sequel, mi6, ...</td>\n",
+       "      <td>[DanielCraig, ChristophWaltz, LéaSeydoux]</td>\n",
+       "      <td>[SamMendes]</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>49026</td>\n",
+       "      <td>The Dark Knight Rises</td>\n",
+       "      <td>[Following, the, death, of, District, Attorney...</td>\n",
+       "      <td>[Action, Crime, Drama, Thriller]</td>\n",
+       "      <td>[dccomics, crimefighter, terrorist, secretiden...</td>\n",
+       "      <td>[ChristianBale, MichaelCaine, GaryOldman]</td>\n",
+       "      <td>[ChristopherNolan]</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>49529</td>\n",
+       "      <td>John Carter</td>\n",
+       "      <td>[John, Carter, is, a, war-weary,, former, mili...</td>\n",
+       "      <td>[Action, Adventure, ScienceFiction]</td>\n",
+       "      <td>[basedonnovel, mars, medallion, spacetravel, p...</td>\n",
+       "      <td>[TaylorKitsch, LynnCollins, SamanthaMorton]</td>\n",
+       "      <td>[AndrewStanton]</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       id                                     title  \\\n",
+       "0   19995                                    Avatar   \n",
+       "1     285  Pirates of the Caribbean: At World's End   \n",
+       "2  206647                                   Spectre   \n",
+       "3   49026                     The Dark Knight Rises   \n",
+       "4   49529                               John Carter   \n",
+       "\n",
+       "                                            overview  \\\n",
+       "0  [In, the, 22nd, century,, a, paraplegic, Marin...   \n",
+       "1  [Captain, Barbossa,, long, believed, to, be, d...   \n",
+       "2  [A, cryptic, message, from, Bond’s, past, send...   \n",
+       "3  [Following, the, death, of, District, Attorney...   \n",
+       "4  [John, Carter, is, a, war-weary,, former, mili...   \n",
+       "\n",
+       "                                         genres  \\\n",
+       "0  [Action, Adventure, Fantasy, ScienceFiction]   \n",
+       "1                  [Adventure, Fantasy, Action]   \n",
+       "2                    [Action, Adventure, Crime]   \n",
+       "3              [Action, Crime, Drama, Thriller]   \n",
+       "4           [Action, Adventure, ScienceFiction]   \n",
+       "\n",
+       "                                            keywords  \\\n",
+       "0  [cultureclash, future, spacewar, spacecolony, ...   \n",
+       "1  [ocean, drugabuse, exoticisland, eastindiatrad...   \n",
+       "2  [spy, basedonnovel, secretagent, sequel, mi6, ...   \n",
+       "3  [dccomics, crimefighter, terrorist, secretiden...   \n",
+       "4  [basedonnovel, mars, medallion, spacetravel, p...   \n",
+       "\n",
+       "                                            cast                crew  \n",
+       "0  [SamWorthington, ZoeSaldana, SigourneyWeaver]      [JamesCameron]  \n",
+       "1     [JohnnyDepp, OrlandoBloom, KeiraKnightley]     [GoreVerbinski]  \n",
+       "2      [DanielCraig, ChristophWaltz, LéaSeydoux]         [SamMendes]  \n",
+       "3      [ChristianBale, MichaelCaine, GaryOldman]  [ChristopherNolan]  \n",
+       "4    [TaylorKitsch, LynnCollins, SamanthaMorton]     [AndrewStanton]  "
+      ]
+     },
+     "execution_count": 40,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 41,
+   "id": "0894ac9f-ad4b-4748-afb3-8d1315ed48e9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "movies['tags']=movies['overview'] + movies['genres'] + movies['keywords'] + movies['cast'] + movies['crew']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "id": "175e5f11-53e2-4512-8392-13165ab30e1d",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>overview</th>\n",
+       "      <th>genres</th>\n",
+       "      <th>keywords</th>\n",
+       "      <th>cast</th>\n",
+       "      <th>crew</th>\n",
+       "      <th>tags</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>[In, the, 22nd, century,, a, paraplegic, Marin...</td>\n",
+       "      <td>[Action, Adventure, Fantasy, ScienceFiction]</td>\n",
+       "      <td>[cultureclash, future, spacewar, spacecolony, ...</td>\n",
+       "      <td>[SamWorthington, ZoeSaldana, SigourneyWeaver]</td>\n",
+       "      <td>[JamesCameron]</td>\n",
+       "      <td>[In, the, 22nd, century,, a, paraplegic, Marin...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      id   title                                           overview  \\\n",
+       "0  19995  Avatar  [In, the, 22nd, century,, a, paraplegic, Marin...   \n",
+       "\n",
+       "                                         genres  \\\n",
+       "0  [Action, Adventure, Fantasy, ScienceFiction]   \n",
+       "\n",
+       "                                            keywords  \\\n",
+       "0  [cultureclash, future, spacewar, spacecolony, ...   \n",
+       "\n",
+       "                                            cast            crew  \\\n",
+       "0  [SamWorthington, ZoeSaldana, SigourneyWeaver]  [JamesCameron]   \n",
+       "\n",
+       "                                                tags  \n",
+       "0  [In, the, 22nd, century,, a, paraplegic, Marin...  "
+      ]
+     },
+     "execution_count": 42,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 44,
+   "id": "2e88003f-0381-4f0c-88da-87d823d46be6",
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "KeyError",
+     "evalue": "\"['movie_id'] not in index\"",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[31m---------------------------------------------------------------------------\u001b[39m",
+      "\u001b[31mKeyError\u001b[39m                                  Traceback (most recent call last)",
+      "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[44]\u001b[39m\u001b[32m, line 1\u001b[39m\n\u001b[32m----> \u001b[39m\u001b[32m1\u001b[39m \u001b[43mmovies\u001b[49m\u001b[43m[\u001b[49m\u001b[43m[\u001b[49m\u001b[33;43m'\u001b[39;49m\u001b[33;43mmovie_id\u001b[39;49m\u001b[33;43m'\u001b[39;49m\u001b[43m,\u001b[49m\u001b[33;43m'\u001b[39;49m\u001b[33;43mtitle\u001b[39;49m\u001b[33;43m'\u001b[39;49m\u001b[43m,\u001b[49m\u001b[33;43m'\u001b[39;49m\u001b[33;43mtags\u001b[39;49m\u001b[33;43m'\u001b[39;49m\u001b[43m]\u001b[49m\u001b[43m]\u001b[49m\n",
+      "\u001b[36mFile \u001b[39m\u001b[32mC:\\ProgramData\\anaconda3\\Lib\\site-packages\\pandas\\core\\frame.py:4119\u001b[39m, in \u001b[36mDataFrame.__getitem__\u001b[39m\u001b[34m(self, key)\u001b[39m\n\u001b[32m   4117\u001b[39m     \u001b[38;5;28;01mif\u001b[39;00m is_iterator(key):\n\u001b[32m   4118\u001b[39m         key = \u001b[38;5;28mlist\u001b[39m(key)\n\u001b[32m-> \u001b[39m\u001b[32m4119\u001b[39m     indexer = \u001b[38;5;28;43mself\u001b[39;49m\u001b[43m.\u001b[49m\u001b[43mcolumns\u001b[49m\u001b[43m.\u001b[49m\u001b[43m_get_indexer_strict\u001b[49m\u001b[43m(\u001b[49m\u001b[43mkey\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[33;43m\"\u001b[39;49m\u001b[33;43mcolumns\u001b[39;49m\u001b[33;43m\"\u001b[39;49m\u001b[43m)\u001b[49m[\u001b[32m1\u001b[39m]\n\u001b[32m   4121\u001b[39m \u001b[38;5;66;03m# take() does not accept boolean indexers\u001b[39;00m\n\u001b[32m   4122\u001b[39m \u001b[38;5;28;01mif\u001b[39;00m \u001b[38;5;28mgetattr\u001b[39m(indexer, \u001b[33m\"\u001b[39m\u001b[33mdtype\u001b[39m\u001b[33m\"\u001b[39m, \u001b[38;5;28;01mNone\u001b[39;00m) == \u001b[38;5;28mbool\u001b[39m:\n",
+      "\u001b[36mFile \u001b[39m\u001b[32mC:\\ProgramData\\anaconda3\\Lib\\site-packages\\pandas\\core\\indexes\\base.py:6212\u001b[39m, in \u001b[36mIndex._get_indexer_strict\u001b[39m\u001b[34m(self, key, axis_name)\u001b[39m\n\u001b[32m   6209\u001b[39m \u001b[38;5;28;01melse\u001b[39;00m:\n\u001b[32m   6210\u001b[39m     keyarr, indexer, new_indexer = \u001b[38;5;28mself\u001b[39m._reindex_non_unique(keyarr)\n\u001b[32m-> \u001b[39m\u001b[32m6212\u001b[39m \u001b[38;5;28;43mself\u001b[39;49m\u001b[43m.\u001b[49m\u001b[43m_raise_if_missing\u001b[49m\u001b[43m(\u001b[49m\u001b[43mkeyarr\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mindexer\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43maxis_name\u001b[49m\u001b[43m)\u001b[49m\n\u001b[32m   6214\u001b[39m keyarr = \u001b[38;5;28mself\u001b[39m.take(indexer)\n\u001b[32m   6215\u001b[39m \u001b[38;5;28;01mif\u001b[39;00m \u001b[38;5;28misinstance\u001b[39m(key, Index):\n\u001b[32m   6216\u001b[39m     \u001b[38;5;66;03m# GH 42790 - Preserve name from an Index\u001b[39;00m\n",
+      "\u001b[36mFile \u001b[39m\u001b[32mC:\\ProgramData\\anaconda3\\Lib\\site-packages\\pandas\\core\\indexes\\base.py:6264\u001b[39m, in \u001b[36mIndex._raise_if_missing\u001b[39m\u001b[34m(self, key, indexer, axis_name)\u001b[39m\n\u001b[32m   6261\u001b[39m     \u001b[38;5;28;01mraise\u001b[39;00m \u001b[38;5;167;01mKeyError\u001b[39;00m(\u001b[33mf\u001b[39m\u001b[33m\"\u001b[39m\u001b[33mNone of [\u001b[39m\u001b[38;5;132;01m{\u001b[39;00mkey\u001b[38;5;132;01m}\u001b[39;00m\u001b[33m] are in the [\u001b[39m\u001b[38;5;132;01m{\u001b[39;00maxis_name\u001b[38;5;132;01m}\u001b[39;00m\u001b[33m]\u001b[39m\u001b[33m\"\u001b[39m)\n\u001b[32m   6263\u001b[39m not_found = \u001b[38;5;28mlist\u001b[39m(ensure_index(key)[missing_mask.nonzero()[\u001b[32m0\u001b[39m]].unique())\n\u001b[32m-> \u001b[39m\u001b[32m6264\u001b[39m \u001b[38;5;28;01mraise\u001b[39;00m \u001b[38;5;167;01mKeyError\u001b[39;00m(\u001b[33mf\u001b[39m\u001b[33m\"\u001b[39m\u001b[38;5;132;01m{\u001b[39;00mnot_found\u001b[38;5;132;01m}\u001b[39;00m\u001b[33m not in index\u001b[39m\u001b[33m\"\u001b[39m)\n",
+      "\u001b[31mKeyError\u001b[39m: \"['movie_id'] not in index\""
+     ]
+    }
+   ],
+   "source": [
+    "movies[['movie_id','title','tags']]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "id": "6e54f93f-487e-40a1-8fe4-a1dcaba2e487",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>tags</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>[In, the, 22nd, century,, a, paraplegic, Marin...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>285</td>\n",
+       "      <td>Pirates of the Caribbean: At World's End</td>\n",
+       "      <td>[Captain, Barbossa,, long, believed, to, be, d...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>206647</td>\n",
+       "      <td>Spectre</td>\n",
+       "      <td>[A, cryptic, message, from, Bond’s, past, send...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>49026</td>\n",
+       "      <td>The Dark Knight Rises</td>\n",
+       "      <td>[Following, the, death, of, District, Attorney...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>49529</td>\n",
+       "      <td>John Carter</td>\n",
+       "      <td>[John, Carter, is, a, war-weary,, former, mili...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4804</th>\n",
+       "      <td>9367</td>\n",
+       "      <td>El Mariachi</td>\n",
+       "      <td>[El, Mariachi, just, wants, to, play, his, gui...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4805</th>\n",
+       "      <td>72766</td>\n",
+       "      <td>Newlyweds</td>\n",
+       "      <td>[A, newlywed, couple's, honeymoon, is, upended...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4806</th>\n",
+       "      <td>231617</td>\n",
+       "      <td>Signed, Sealed, Delivered</td>\n",
+       "      <td>[\"Signed,, Sealed,, Delivered\", introduces, a,...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4807</th>\n",
+       "      <td>126186</td>\n",
+       "      <td>Shanghai Calling</td>\n",
+       "      <td>[When, ambitious, New, York, attorney, Sam, is...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4808</th>\n",
+       "      <td>25975</td>\n",
+       "      <td>My Date with Drew</td>\n",
+       "      <td>[Ever, since, the, second, grade, when, he, fi...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>4806 rows × 3 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          id                                     title  \\\n",
+       "0      19995                                    Avatar   \n",
+       "1        285  Pirates of the Caribbean: At World's End   \n",
+       "2     206647                                   Spectre   \n",
+       "3      49026                     The Dark Knight Rises   \n",
+       "4      49529                               John Carter   \n",
+       "...      ...                                       ...   \n",
+       "4804    9367                               El Mariachi   \n",
+       "4805   72766                                 Newlyweds   \n",
+       "4806  231617                 Signed, Sealed, Delivered   \n",
+       "4807  126186                          Shanghai Calling   \n",
+       "4808   25975                         My Date with Drew   \n",
+       "\n",
+       "                                                   tags  \n",
+       "0     [In, the, 22nd, century,, a, paraplegic, Marin...  \n",
+       "1     [Captain, Barbossa,, long, believed, to, be, d...  \n",
+       "2     [A, cryptic, message, from, Bond’s, past, send...  \n",
+       "3     [Following, the, death, of, District, Attorney...  \n",
+       "4     [John, Carter, is, a, war-weary,, former, mili...  \n",
+       "...                                                 ...  \n",
+       "4804  [El, Mariachi, just, wants, to, play, his, gui...  \n",
+       "4805  [A, newlywed, couple's, honeymoon, is, upended...  \n",
+       "4806  [\"Signed,, Sealed,, Delivered\", introduces, a,...  \n",
+       "4807  [When, ambitious, New, York, attorney, Sam, is...  \n",
+       "4808  [Ever, since, the, second, grade, when, he, fi...  \n",
+       "\n",
+       "[4806 rows x 3 columns]"
+      ]
+     },
+     "execution_count": 45,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "movies[['id','title','tags']]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "id": "cbeedd28-3316-4874-976b-3ceb583fc7c0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "new_df=movies[['id','title','tags']]\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 47,
+   "id": "3757bc4e-f8a5-4b0b-aee3-2c122ec57173",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0       In the 22nd century, a paraplegic Marine is di...\n",
+       "1       Captain Barbossa, long believed to be dead, ha...\n",
+       "2       A cryptic message from Bond’s past sends him o...\n",
+       "3       Following the death of District Attorney Harve...\n",
+       "4       John Carter is a war-weary, former military ca...\n",
+       "                              ...                        \n",
+       "4804    El Mariachi just wants to play his guitar and ...\n",
+       "4805    A newlywed couple's honeymoon is upended by th...\n",
+       "4806    \"Signed, Sealed, Delivered\" introduces a dedic...\n",
+       "4807    When ambitious New York attorney Sam is sent t...\n",
+       "4808    Ever since the second grade when he first saw ...\n",
+       "Name: tags, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 47,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "new_df['tags'].apply(lambda x:\" \".join(x))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "id": "bdb90dae-d004-43c1-9e30-8df430dce392",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\siwac\\AppData\\Local\\Temp\\ipykernel_18476\\487797088.py:1: SettingWithCopyWarning: \n",
+      "A value is trying to be set on a copy of a slice from a DataFrame.\n",
+      "Try using .loc[row_indexer,col_indexer] = value instead\n",
+      "\n",
+      "See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n",
+      "  new_df['tags']=new_df['tags'].apply(lambda x:\" \".join(x))\n"
+     ]
+    }
+   ],
+   "source": [
+    "new_df['tags']=new_df['tags'].apply(lambda x:\" \".join(x))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "id": "e9dac8ce-2281-4b46-b285-47bae77d1e80",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>tags</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>In the 22nd century, a paraplegic Marine is di...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>285</td>\n",
+       "      <td>Pirates of the Caribbean: At World's End</td>\n",
+       "      <td>Captain Barbossa, long believed to be dead, ha...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>206647</td>\n",
+       "      <td>Spectre</td>\n",
+       "      <td>A cryptic message from Bond’s past sends him o...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>49026</td>\n",
+       "      <td>The Dark Knight Rises</td>\n",
+       "      <td>Following the death of District Attorney Harve...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>49529</td>\n",
+       "      <td>John Carter</td>\n",
+       "      <td>John Carter is a war-weary, former military ca...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       id                                     title  \\\n",
+       "0   19995                                    Avatar   \n",
+       "1     285  Pirates of the Caribbean: At World's End   \n",
+       "2  206647                                   Spectre   \n",
+       "3   49026                     The Dark Knight Rises   \n",
+       "4   49529                               John Carter   \n",
+       "\n",
+       "                                                tags  \n",
+       "0  In the 22nd century, a paraplegic Marine is di...  \n",
+       "1  Captain Barbossa, long believed to be dead, ha...  \n",
+       "2  A cryptic message from Bond’s past sends him o...  \n",
+       "3  Following the death of District Attorney Harve...  \n",
+       "4  John Carter is a war-weary, former military ca...  "
+      ]
+     },
+     "execution_count": 49,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "new_df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 60,
+   "id": "575fde35-5ec2-4e8e-9c9c-e3c0a5a0075c",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: nltk in c:\\programdata\\anaconda3\\lib\\site-packages (3.9.2)\n",
+      "Requirement already satisfied: click in c:\\programdata\\anaconda3\\lib\\site-packages (from nltk) (8.2.1)\n",
+      "Requirement already satisfied: joblib in c:\\programdata\\anaconda3\\lib\\site-packages (from nltk) (1.5.2)\n",
+      "Requirement already satisfied: regex>=2021.8.3 in c:\\programdata\\anaconda3\\lib\\site-packages (from nltk) (2025.9.1)\n",
+      "Requirement already satisfied: tqdm in c:\\programdata\\anaconda3\\lib\\site-packages (from nltk) (4.67.1)\n",
+      "Requirement already satisfied: colorama in c:\\programdata\\anaconda3\\lib\\site-packages (from click->nltk) (0.4.6)\n"
+     ]
+    }
+   ],
+   "source": [
+    "!pip install nltk"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "id": "b9e9d6c4-ef71-4ba4-85a7-e8f19302be51",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import nltk"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 65,
+   "id": "60e9f3e7-b2aa-4fe6-b8b7-28badfad9d2c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from nltk.stem.porter import PorterStemmer\n",
+    "ps=PorterStemmer()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 67,
+   "id": "2c7869ce-d7bd-469a-b4d9-13d292e9b6da",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def stem(text):\n",
+    "    y=[]\n",
+    "    for i in text.split():\n",
+    "        y.append(ps.stem(i))\n",
+    "    return \" \".join(y)\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 62,
+   "id": "cb483cf5-7c23-4241-801c-92330f66a053",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0       in the 22nd century, a paraplegic marine is di...\n",
+       "1       captain barbossa, long believed to be dead, ha...\n",
+       "2       a cryptic message from bond’s past sends him o...\n",
+       "3       following the death of district attorney harve...\n",
+       "4       john carter is a war-weary, former military ca...\n",
+       "                              ...                        \n",
+       "4804    el mariachi just wants to play his guitar and ...\n",
+       "4805    a newlywed couple's honeymoon is upended by th...\n",
+       "4806    \"signed, sealed, delivered\" introduces a dedic...\n",
+       "4807    when ambitious new york attorney sam is sent t...\n",
+       "4808    ever since the second grade when he first saw ...\n",
+       "Name: tags, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 62,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "new_df['tags'].apply(lambda x:x.lower())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 68,
+   "id": "26d75862-433e-4c01-ab23-30f2cc414f18",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0       in the 22nd century, a parapleg marin is dispa...\n",
+       "1       captain barbossa, long believ to be dead, ha c...\n",
+       "2       a cryptic messag from bond’ past send him on a...\n",
+       "3       follow the death of district attorney harvey d...\n",
+       "4       john carter is a war-weary, former militari ca...\n",
+       "                              ...                        \n",
+       "4804    el mariachi just want to play hi guitar and ca...\n",
+       "4805    a newlyw couple' honeymoon is upend by the arr...\n",
+       "4806    \"signed, sealed, delivered\" introduc a dedic q...\n",
+       "4807    when ambiti new york attorney sam is sent to s...\n",
+       "4808    ever sinc the second grade when he first saw h...\n",
+       "Name: tags, Length: 4806, dtype: object"
+      ]
+     },
+     "execution_count": 68,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "new_df['tags'].apply(stem)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 69,
+   "id": "31b8db6f-c570-47b0-99b7-6536ec2f59e7",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\siwac\\AppData\\Local\\Temp\\ipykernel_18476\\3514595201.py:1: SettingWithCopyWarning: \n",
+      "A value is trying to be set on a copy of a slice from a DataFrame.\n",
+      "Try using .loc[row_indexer,col_indexer] = value instead\n",
+      "\n",
+      "See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n",
+      "  new_df['tags']=new_df['tags'].apply(stem)\n"
+     ]
+    }
+   ],
+   "source": [
+    "new_df['tags']=new_df['tags'].apply(stem)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "id": "939e5be9-805d-47fe-ad71-211da633a844",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\siwac\\AppData\\Local\\Temp\\ipykernel_18476\\4224080999.py:1: SettingWithCopyWarning: \n",
+      "A value is trying to be set on a copy of a slice from a DataFrame.\n",
+      "Try using .loc[row_indexer,col_indexer] = value instead\n",
+      "\n",
+      "See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n",
+      "  new_df['tags']=new_df['tags'].apply(lambda x:x.lower())\n"
+     ]
+    }
+   ],
+   "source": [
+    "new_df['tags']=new_df['tags'].apply(lambda x:x.lower())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "id": "93b5da38-61d9-4259-b83b-b325bd89e27b",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>tags</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>in the 22nd century, a paraplegic marine is di...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>285</td>\n",
+       "      <td>Pirates of the Caribbean: At World's End</td>\n",
+       "      <td>captain barbossa, long believed to be dead, ha...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>206647</td>\n",
+       "      <td>Spectre</td>\n",
+       "      <td>a cryptic message from bond’s past sends him o...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>49026</td>\n",
+       "      <td>The Dark Knight Rises</td>\n",
+       "      <td>following the death of district attorney harve...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>49529</td>\n",
+       "      <td>John Carter</td>\n",
+       "      <td>john carter is a war-weary, former military ca...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       id                                     title  \\\n",
+       "0   19995                                    Avatar   \n",
+       "1     285  Pirates of the Caribbean: At World's End   \n",
+       "2  206647                                   Spectre   \n",
+       "3   49026                     The Dark Knight Rises   \n",
+       "4   49529                               John Carter   \n",
+       "\n",
+       "                                                tags  \n",
+       "0  in the 22nd century, a paraplegic marine is di...  \n",
+       "1  captain barbossa, long believed to be dead, ha...  \n",
+       "2  a cryptic message from bond’s past sends him o...  \n",
+       "3  following the death of district attorney harve...  \n",
+       "4  john carter is a war-weary, former military ca...  "
+      ]
+     },
+     "execution_count": 53,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "new_df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "id": "2f6d3c73-9583-40f8-b818-60b32551f6f2",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>tags</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>in the 22nd century, a paraplegic marine is di...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      id   title                                               tags\n",
+       "0  19995  Avatar  in the 22nd century, a paraplegic marine is di..."
+      ]
+     },
+     "execution_count": 54,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "new_df.head(1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 70,
+   "id": "5644772f-016d-452c-8e0e-ce9969ecf7f0",
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'CountVectorizor' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[31m---------------------------------------------------------------------------\u001b[39m",
+      "\u001b[31mNameError\u001b[39m                                 Traceback (most recent call last)",
+      "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[70]\u001b[39m\u001b[32m, line 2\u001b[39m\n\u001b[32m      1\u001b[39m \u001b[38;5;28;01mfrom\u001b[39;00m\u001b[38;5;250m \u001b[39m\u001b[34;01msklearn\u001b[39;00m\u001b[34;01m.\u001b[39;00m\u001b[34;01mfeature_extraction\u001b[39;00m\u001b[34;01m.\u001b[39;00m\u001b[34;01mtext\u001b[39;00m\u001b[38;5;250m \u001b[39m\u001b[38;5;28;01mimport\u001b[39;00m CountVectorizer\n\u001b[32m----> \u001b[39m\u001b[32m2\u001b[39m cv=\u001b[43mCountVectorizor\u001b[49m(max_features=\u001b[32m5000\u001b[39m,stop_words=\u001b[33m'\u001b[39m\u001b[33menglish\u001b[39m\u001b[33m'\u001b[39m)\n",
+      "\u001b[31mNameError\u001b[39m: name 'CountVectorizor' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "from sklearn.feature_extraction.text import CountVectorizer\n",
+    "cv=CountVectorizor(max_features=5000,stop_words='english')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 75,
+   "id": "94dd2879-c1f1-4de9-a970-8d796c69c647",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.feature_extraction.text import CountVectorizer\n",
+    "cv = CountVectorizer(max_features=5000, stop_words='english')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 76,
+   "id": "4545f23c-3cdf-42c4-a965-74f368d3154a",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[0, 0, 0, ..., 0, 0, 0],\n",
+       "       [0, 0, 0, ..., 0, 0, 0],\n",
+       "       [0, 0, 0, ..., 0, 0, 0],\n",
+       "       ...,\n",
+       "       [0, 0, 0, ..., 0, 0, 0],\n",
+       "       [0, 0, 0, ..., 0, 0, 0],\n",
+       "       [0, 0, 0, ..., 0, 0, 0]], shape=(4806, 5000))"
+      ]
+     },
+     "execution_count": 76,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cv.fit_transform(new_df['tags']).toarray()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 77,
+   "id": "921568bf-86eb-4da0-8211-757a9434e3e7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "vectors=cv.fit_transform(new_df['tags']).toarray()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "id": "76abd454-4ed9-40d2-857b-1cc5f20bbcd1",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([0, 0, 0, ..., 0, 0, 0], shape=(5000,))"
+      ]
+     },
+     "execution_count": 59,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "vectors[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 79,
+   "id": "bd85320c-832b-4e1a-8fbb-18e62b8be02c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['000', '007', '10', ..., 'zone', 'zoo', 'zooeydeschanel'],\n",
+       "      shape=(5000,), dtype=object)"
+      ]
+     },
+     "execution_count": 79,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cv.get_feature_names_out()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 80,
+   "id": "ec0c488d-ad99-4d03-beb7-3e060c43b3df",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.metrics.pairwise import cosine_similarity"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 82,
+   "id": "143131f1-82c3-4bf0-850b-5f293888b7fd",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(4806, 4806)"
+      ]
+     },
+     "execution_count": 82,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cosine_similarity(vectors).shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 83,
+   "id": "4201ed27-91dc-4276-bb72-3a731e4da5a8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "similarity=cosine_similarity(vectors)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 84,
+   "id": "25b5ec42-9f81-4f3d-8da7-aab6f1028714",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([1.        , 0.08346223, 0.0860309 , ..., 0.04499213, 0.        ,\n",
+       "       0.        ], shape=(4806,))"
+      ]
+     },
+     "execution_count": 84,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "similarity[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 85,
+   "id": "b76d4776-ca5a-4fb1-ae66-01e32f254d8b",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[(1214, np.float64(0.28676966733820225)),\n",
+       " (2405, np.float64(0.26901379342448517)),\n",
+       " (3728, np.float64(0.2605130246476754)),\n",
+       " (507, np.float64(0.255608593705383)),\n",
+       " (539, np.float64(0.2503866978335957))]"
+      ]
+     },
+     "execution_count": 85,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sorted(list(enumerate(similarity[0])),reverse=True,key=lambda x:x[1])[1:6]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 88,
+   "id": "92967577-06c0-4d8c-b384-878af2740bb7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def recommned(movie):\n",
+    "    movie_index= new_df[new_df['title'] == movie].index[0]\n",
+    "    distances= similarity[movie_index]\n",
+    "    movies_list= sorted(list(enumerate(distances)),reverse=True,key=lambda x:x[1])[1:6]\n",
+    "    for i in movies_list:\n",
+    "        print(new_df.iloc[i[0]].title)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 90,
+   "id": "ced60040-4152-4687-937b-b7137c15b42e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Aliens vs Predator: Requiem\n",
+      "Aliens\n",
+      "Falcon Rising\n",
+      "Independence Day\n",
+      "Titan A.E.\n"
+     ]
+    }
+   ],
+   "source": [
+    "recommned('Avatar')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 91,
+   "id": "d80d6ff6-f95a-43c1-b43e-e23062a04997",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The Dark Knight\n",
+      "Batman\n",
+      "Batman\n",
+      "The Dark Knight Rises\n",
+      "10th & Wolf\n"
+     ]
+    }
+   ],
+   "source": [
+    "recommned('Batman Begins')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 92,
+   "id": "2f449c93-2226-4d5a-8b61-867bf1c7639c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pickle"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 93,
+   "id": "dd9207b4-27e9-4c44-8f97-4b79c32bb1a1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pickle.dump(new_df,open('movies.pkl','wb'))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 94,
+   "id": "f89344e5-79de-4d76-befd-93c5f05480b8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pickle.dump(new_df.to_dict(),open('movie_dict.pkl','wb'))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 95,
+   "id": "6c057e8f-afe4-415b-9a6d-8949443a82a3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pickle.dump(similarity,open('similarity.pkl','wb'))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 96,
+   "id": "af0bef94-9691-4aa3-af76-c514859dc3bc",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>id</th>\n",
+       "      <th>title</th>\n",
+       "      <th>tags</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>19995</td>\n",
+       "      <td>Avatar</td>\n",
+       "      <td>in the 22nd century, a parapleg marin is dispa...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>285</td>\n",
+       "      <td>Pirates of the Caribbean: At World's End</td>\n",
+       "      <td>captain barbossa, long believ to be dead, ha c...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>206647</td>\n",
+       "      <td>Spectre</td>\n",
+       "      <td>a cryptic messag from bond’ past send him on a...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>49026</td>\n",
+       "      <td>The Dark Knight Rises</td>\n",
+       "      <td>follow the death of district attorney harvey d...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>49529</td>\n",
+       "      <td>John Carter</td>\n",
+       "      <td>john carter is a war-weary, former militari ca...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "       id                                     title  \\\n",
+       "0   19995                                    Avatar   \n",
+       "1     285  Pirates of the Caribbean: At World's End   \n",
+       "2  206647                                   Spectre   \n",
+       "3   49026                     The Dark Knight Rises   \n",
+       "4   49529                               John Carter   \n",
+       "\n",
+       "                                                tags  \n",
+       "0  in the 22nd century, a parapleg marin is dispa...  \n",
+       "1  captain barbossa, long believ to be dead, ha c...  \n",
+       "2  a cryptic messag from bond’ past send him on a...  \n",
+       "3  follow the death of district attorney harvey d...  \n",
+       "4  john carter is a war-weary, former militari ca...  "
+      ]
+     },
+     "execution_count": 96,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "new_df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "70d31833-c64e-499a-b0b0-d55b8212fe7e",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
